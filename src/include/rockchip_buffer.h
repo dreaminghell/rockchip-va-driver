@@ -25,7 +25,7 @@
 #ifndef ROCKCHIP_BUFFER_H
 #define ROCKCHIP_BUFFER_H
 
-#include <rockchip_drv_video.h>
+#include "rockchip_drv_video.h"
 
 typedef struct coded_buffer_segment
 {
@@ -48,16 +48,34 @@ typedef struct object_buffer {
 #define ALIGN(i, n)    (((i) + (n) - 1) & ~((n) - 1))
 #define CODED_BUFFER_HEADER_SIZE    ALIGN(sizeof(coded_buffer_segment_t), 64)
 
-VAStatus rockchip_CreateBuffer(VADriverContextP ctx, VAContextID context, VABufferType type, unsigned int size, unsigned int num_elements, void *data, VABufferID *buf_id);
+VAStatus rockchip_allocate_buffer(object_buffer_p obj_buffer, int size);
+
+void
+rockchip_destroy_buffer(struct rockchip_driver_data *driver_data,
+	object_buffer_p obj_buffer);
+
+
+VAStatus
+rockchip_CreateBuffer
+(VADriverContextP ctx, VAContextID context,
+VABufferType type, unsigned int size, unsigned int num_elements,
+void *data, VABufferID *buf_id);
 
 VAStatus rockchip_DestroyBuffer(VADriverContextP ctx, VABufferID buffer_id);
 
-VAStatus rockchip_BufferSetNumElements(VADriverContextP ctx, VABufferID buf_id, unsigned int num_elements);
+VAStatus
+rockchip_BufferSetNumElements
+(VADriverContextP ctx, VABufferID buf_id, unsigned int num_elements);
 
-VAStatus rockchip_MapBuffer(VADriverContextP ctx, VABufferID buf_id, void **pbuf);
+VAStatus
+rockchip_MapBuffer(VADriverContextP ctx, VABufferID buf_id, void **pbuf);
 
-VAStatus rockchip_UnmapBuffer(VADriverContextP ctx, VABufferID buf_id);
+VAStatus
+rockchip_UnmapBuffer(VADriverContextP ctx, VABufferID buf_id);
 
-VAStatus rockchip_BufferInfo(VADriverContextP ctx, VABufferID buf_id, VABufferType *type, unsigned int *size, unsigned int *num_elements);
+VAStatus 
+rockchip_BufferInfo
+(VADriverContextP ctx, VABufferID buf_id, VABufferType *type, 
+unsigned int *size, unsigned int *num_elements);
 
 #endif /* ROCKCHIP_BUFFER_H */

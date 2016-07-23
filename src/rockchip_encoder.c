@@ -23,7 +23,9 @@
  */
 
 #include "rockchip_drv_video.h"
+#include "rockchip_buffer.h"
 #include "v4l2_calls.h"
+#include "v4l2_utils.h"
 
 #define DEV_NAME_RK3288_NEW     "rockchip-vpu-enc"
 #define DEV_NAME_RK3288_LEGACY  "rk3288-vpu-enc"
@@ -40,6 +42,19 @@
 
 #define LOG_INIT()
 
+static struct timeval last_tv;
+static struct timeval tv;
+
+static void log_time(char *msg)
+{
+    if (getenv("LOG_TIME")) {
+        gettimeofday(&tv, NULL);
+        if (msg)
+            printf("%s: %ld ms\n", msg, DURATION(last_tv, tv));
+        last_tv = tv;
+    }
+}
+
 /**
  * TODO: Seperate h264 encoder from this
  */
@@ -54,8 +69,8 @@ VAStatus rockchip_DeinitEncoder(
     obj_context = CONTEXT(context);
     ASSERT(obj_context);
 
-    v4l2_streamoff(obj_context->enc_ctx);
-    v4l2_deinit(obj_context->enc_ctx);
+    v4l2_enc_streamoff(obj_context->enc_ctx);
+    v4l2_enc_deinit(obj_context->enc_ctx);
 
     LOG_DEINIT();
 
@@ -74,9 +89,9 @@ VAStatus rockchip_InitEncoder(
 
     LOG_INIT();
 
-    obj_context->enc_ctx = v4l2_init_by_name(DEV_NAME_RK3288_NEW);
+    obj_context->enc_ctx = v4l2_enc_init_by_name(DEV_NAME_RK3288_NEW);
     if (!obj_context->enc_ctx) {
-        obj_context->enc_ctx = v4l2_init_by_name(DEV_NAME_RK3288_LEGACY);
+        obj_context->enc_ctx = v4l2_enc_init_by_name(DEV_NAME_RK3288_LEGACY);
         if (!obj_context->enc_ctx)
             return VA_STATUS_ERROR_UNKNOWN;
     }
@@ -89,13 +104,13 @@ VAStatus rockchip_InitEncoder(
             obj_context->picture_width, obj_context->picture_height);
     gettimeofday(&obj_context->statistics.tm, NULL);
 
-    if (v4l2_s_fmt(obj_context->enc_ctx) < 0)
+    if (v4l2_enc_s_fmt(obj_context->enc_ctx) < 0)
         goto failed_v4l2;
 
-    if (v4l2_reqbufs(obj_context->enc_ctx) < 0)
+    if (v4l2_enc_reqbufs(obj_context->enc_ctx) < 0)
         goto failed_v4l2;
 
-    if (v4l2_querybuf(obj_context->enc_ctx) < 0)
+    if (v4l2_enc_querybuf(obj_context->enc_ctx) < 0)
         goto failed_v4l2;
 
     return VA_STATUS_SUCCESS;
@@ -105,6 +120,7 @@ failed_v4l2:
 
     return VA_STATUS_ERROR_UNKNOWN;
 }
+
 VAStatus rockchip_PrepareEncode(
         VADriverContextP ctx,
         VAContextID context,
@@ -163,7 +179,7 @@ VAStatus rockchip_ProcessSPS(VADriverContextP ctx, VAContextID context, VABuffer
     ext_ctrls->count = 1;
     ext_ctrls->controls = &obj_context->ctrl[0];
 
-    v4l2_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
+    v4l2_enc_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
 
     free(ext_ctrls);
 
@@ -203,7 +219,7 @@ VAStatus rockchip_ProcessPPS(VADriverContextP ctx, VAContextID context, VABuffer
     ext_ctrls->count = 1;
     ext_ctrls->controls = &obj_context->ctrl[0];
 
-    v4l2_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
+    v4l2_enc_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
     free(ext_ctrls);
 
     obj_context->h264_params.coded_buf = pps->coded_buf;
@@ -243,7 +259,7 @@ VAStatus rockchip_ProcessSliceParam(VADriverContextP ctx, VAContextID context, V
     ext_ctrls->count = 1;
     ext_ctrls->controls = &obj_context->ctrl[0];
 
-    v4l2_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
+    v4l2_enc_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
     free(ext_ctrls);
 
     return VA_STATUS_SUCCESS;
@@ -289,7 +305,7 @@ VAStatus rockchip_ProcessMiscParam(VADriverContextP ctx, VAContextID context, VA
 	parms.parm.output.timeperframe.numerator = 1;
 	parms.parm.output.timeperframe.denominator = frame_rate->framerate;
 
-	v4l2_s_parm(obj_context->enc_ctx, &parms);
+	v4l2_enc_s_parm(obj_context->enc_ctx, &parms);
 
         break;
     case VAEncMiscParameterTypeRateControl:
@@ -306,7 +322,7 @@ VAStatus rockchip_ProcessMiscParam(VADriverContextP ctx, VAContextID context, VA
         ext_ctrls->count = 1;
         ext_ctrls->controls = &obj_context->ctrl[0];
 
-        v4l2_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
+        v4l2_enc_s_ext_ctrls(obj_context->enc_ctx, ext_ctrls);
 
         break;
     case VAEncMiscParameterTypeAIR:
@@ -331,18 +347,6 @@ VAStatus rockchip_ProcessMiscParam(VADriverContextP ctx, VAContextID context, VA
 
     return VA_STATUS_SUCCESS;
 }
-struct timeval last_tv;
-struct timeval tv;
-
-void log_time(char *msg)
-{
-    if (getenv("LOG_TIME")) {
-        gettimeofday(&tv, NULL);
-        if (msg)
-            printf("%s: %ld ms\n", msg, DURATION(last_tv, tv));
-        last_tv = tv;
-    }
-}
 
 VAStatus rockchip_DoEncode(
     VADriverContextP ctx,
@@ -363,20 +367,20 @@ VAStatus rockchip_DoEncode(
     ASSERT(obj_buffer);
 
     if (!obj_context->streaming) {
-        if (v4l2_streamon(obj_context->enc_ctx) < 0)
+        if (v4l2_enc_streamon(obj_context->enc_ctx) < 0)
             return VA_STATUS_ERROR_UNKNOWN;
 
-        if (v4l2_qbuf_output(obj_context->enc_ctx) < 0)
+        if (v4l2_enc_qbuf_output(obj_context->enc_ctx) < 0)
             return VA_STATUS_ERROR_UNKNOWN;
 
         obj_context->streaming = 1;
     } else {
         log_time("before dq input");
-        v4l2_dqbuf_input(obj_context->enc_ctx);
+        v4l2_enc_dqbuf_input(obj_context->enc_ctx);
     }
 
     log_time("start encode");
-    v4l2_qbuf_input(obj_context->enc_ctx, obj_buffer->buffer_data,
+    v4l2_enc_qbuf_input(obj_context->enc_ctx, obj_buffer->buffer_data,
             obj_buffer->buffer_size);
     log_time("after queue input");
 
@@ -402,7 +406,7 @@ VAStatus rockchip_SyncEncoder(
     ASSERT(obj_context);
 
     log_time("before dque out");
-    v4l2_dqbuf_output(obj_context->enc_ctx);
+    v4l2_enc_dqbuf_output(obj_context->enc_ctx);
     log_time("after encode");
 
     object_buffer_p obj_buffer = BUFFER(obj_surface->coded_buffer);
@@ -443,7 +447,7 @@ VAStatus rockchip_SyncEncoder(
         statistics->tm = tm;
     }
 
-    v4l2_qbuf_output(obj_context->enc_ctx);
+    v4l2_enc_qbuf_output(obj_context->enc_ctx);
 
     obj_surface->context_id = VA_INVALID_ID;
     obj_surface->coded_buffer = VA_INVALID_ID;

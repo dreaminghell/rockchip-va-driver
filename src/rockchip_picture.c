@@ -22,6 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "rockchip_buffer.h"
 #include "rockchip_drv_video.h"
 
 VAStatus rockchip_BeginPicture(

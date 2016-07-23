@@ -27,12 +27,13 @@
  */
 
 #include "rockchip_drv_video.h"
+#include "rockchip_buffer.h"
 #include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 
-VAStatus rockchip_QueryConfigProfiles(
+static VAStatus rockchip_QueryConfigProfiles(
     VADriverContextP ctx,
     VAProfile *profile_list,    /* out */
     int *num_profiles           /* out */
@@ -51,7 +52,7 @@ VAStatus rockchip_QueryConfigProfiles(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_QueryConfigEntrypoints(
+static VAStatus rockchip_QueryConfigEntrypoints(
     VADriverContextP ctx,
     VAProfile profile,
     VAEntrypoint  *entrypoint_list, /* out */
@@ -82,7 +83,7 @@ VAStatus rockchip_QueryConfigEntrypoints(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_GetConfigAttributes(
+static VAStatus rockchip_GetConfigAttributes(
     VADriverContextP ctx,
     VAProfile profile,
     VAEntrypoint entrypoint,
@@ -140,7 +141,7 @@ static VAStatus rockchip_update_attribute(object_config_p obj_config, VAConfigAt
     return VA_STATUS_ERROR_MAX_NUM_EXCEEDED;
 }
 
-VAStatus rockchip_CreateConfig(
+static VAStatus rockchip_CreateConfig(
     VADriverContextP ctx,
     VAProfile profile,
     VAEntrypoint entrypoint,
@@ -205,7 +206,7 @@ VAStatus rockchip_CreateConfig(
     return vaStatus;
 }
 
-VAStatus rockchip_DestroyConfig(
+static VAStatus rockchip_DestroyConfig(
     VADriverContextP ctx,
     VAConfigID config_id
 )
@@ -224,7 +225,7 @@ VAStatus rockchip_DestroyConfig(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_QueryConfigAttributes(
+static VAStatus rockchip_QueryConfigAttributes(
     VADriverContextP ctx,
     VAConfigID config_id,
     VAProfile *profile,     /* out */
@@ -251,7 +252,7 @@ VAStatus rockchip_QueryConfigAttributes(
     return vaStatus;
 }
 
-VAStatus rockchip_QuerySubpictureFormats(
+static VAStatus rockchip_QuerySubpictureFormats(
     VADriverContextP ctx,
     VAImageFormat *format_list,        /* out */
     unsigned int *flags,       /* out */
@@ -262,7 +263,7 @@ VAStatus rockchip_QuerySubpictureFormats(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_CreateSubpicture(
+static VAStatus rockchip_CreateSubpicture(
     VADriverContextP ctx,
     VAImageID image,
     VASubpictureID *subpicture   /* out */
@@ -272,7 +273,7 @@ VAStatus rockchip_CreateSubpicture(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_DestroySubpicture(
+static VAStatus rockchip_DestroySubpicture(
     VADriverContextP ctx,
     VASubpictureID subpicture
 )
@@ -281,7 +282,7 @@ VAStatus rockchip_DestroySubpicture(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_SetSubpictureImage(
+static VAStatus rockchip_SetSubpictureImage(
     VADriverContextP ctx,
     VASubpictureID subpicture,
     VAImageID image
@@ -291,7 +292,7 @@ VAStatus rockchip_SetSubpictureImage(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_SetSubpicturePalette(
+static VAStatus rockchip_SetSubpicturePalette(
     VADriverContextP ctx,
     VASubpictureID subpicture,
     /*
@@ -306,7 +307,7 @@ VAStatus rockchip_SetSubpicturePalette(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_SetSubpictureChromakey(
+static VAStatus rockchip_SetSubpictureChromakey(
     VADriverContextP ctx,
     VASubpictureID subpicture,
     unsigned int chromakey_min,
@@ -318,7 +319,7 @@ VAStatus rockchip_SetSubpictureChromakey(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_SetSubpictureGlobalAlpha(
+static VAStatus rockchip_SetSubpictureGlobalAlpha(
     VADriverContextP ctx,
     VASubpictureID subpicture,
     float global_alpha
@@ -329,7 +330,7 @@ VAStatus rockchip_SetSubpictureGlobalAlpha(
 }
 
 
-VAStatus rockchip_AssociateSubpicture(
+static VAStatus rockchip_AssociateSubpicture(
     VADriverContextP ctx,
     VASubpictureID subpicture,
     VASurfaceID *target_surfaces,
@@ -353,7 +354,7 @@ VAStatus rockchip_AssociateSubpicture(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_DeassociateSubpicture(
+static VAStatus rockchip_DeassociateSubpicture(
     VADriverContextP ctx,
     VASubpictureID subpicture,
     VASurfaceID *target_surfaces,
@@ -364,7 +365,7 @@ VAStatus rockchip_DeassociateSubpicture(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus rockchip_CreateContext(
+static VAStatus rockchip_CreateContext(
     VADriverContextP ctx,
     VAConfigID config_id,
     int picture_width,
@@ -434,7 +435,7 @@ VAStatus rockchip_CreateContext(
     return vaStatus;
 }
 
-VAStatus rockchip_DestroyContext(
+static VAStatus rockchip_DestroyContext(
     VADriverContextP ctx,
     VAContextID context
 )
@@ -469,7 +470,7 @@ VAStatus rockchip_DestroyContext(
  * least vaMaxNumDisplayAttributes() entries. The actual number of attributes
  * returned in "attr_list" is returned in "num_attributes".
  */
-VAStatus rockchip_QueryDisplayAttributes (
+static VAStatus rockchip_QueryDisplayAttributes (
     VADriverContextP ctx,
     VADisplayAttribute *attr_list,  /* out */
     int *num_attributes     /* out */
@@ -485,7 +486,7 @@ VAStatus rockchip_QueryDisplayAttributes (
  * Only attributes returned with VA_DISPLAY_ATTRIB_GETTABLE set in the "flags" field
  * from vaQueryDisplayAttributes() can have their values retrieved.
  */
-VAStatus rockchip_GetDisplayAttributes (
+static VAStatus rockchip_GetDisplayAttributes (
     VADriverContextP ctx,
     VADisplayAttribute *attr_list,  /* in/out */
     int num_attributes
@@ -501,7 +502,7 @@ VAStatus rockchip_GetDisplayAttributes (
  * from vaQueryDisplayAttributes() can be set.  If the attribute is not settable or
  * the value is out of range, the function returns VA_STATUS_ERROR_ATTR_NOT_SUPPORTED
  */
-VAStatus rockchip_SetDisplayAttributes (
+static VAStatus rockchip_SetDisplayAttributes (
     VADriverContextP ctx,
     VADisplayAttribute *attr_list,
     int num_attributes
@@ -511,7 +512,7 @@ VAStatus rockchip_SetDisplayAttributes (
     return VA_STATUS_ERROR_UNKNOWN;
 }
 
-VAStatus rockchip_Terminate( VADriverContextP ctx )
+static VAStatus rockchip_Terminate( VADriverContextP ctx )
 {
     INIT_DRIVER_DATA
     object_surface_p obj_surface;

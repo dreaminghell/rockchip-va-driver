@@ -41,19 +41,19 @@ typedef struct enc_context {
 
 } enc_context_t, *enc_context_p;
 
-enc_context_p v4l2_init(const char *device_path);
-enc_context_p v4l2_init_by_name(const char *name);
-int v4l2_deinit(enc_context_p ctx);
-int v4l2_reqbufs(enc_context_p ctx);
-int v4l2_querybuf(enc_context_p ctx);
-int v4l2_s_fmt(enc_context_p ctx);
-int v4l2_streamon(enc_context_p ctx);
-int v4l2_streamoff(enc_context_p ctx);
-int v4l2_s_ext_ctrls(enc_context_p ctx, struct v4l2_ext_controls* ext_ctrls);
-int v4l2_s_parm(enc_context_p ctx, struct v4l2_streamparm *parm);
-int v4l2_qbuf_input(enc_context_p ctx, void *data, int size);
-int v4l2_qbuf_output(enc_context_p ctx);
-int v4l2_dqbuf_input(enc_context_p ctx);
-int v4l2_dqbuf_output(enc_context_p ctx);
+enc_context_p v4l2_enc_init(const char *device_path);
+enc_context_p v4l2_enc_init_by_name(const char *name);
+int v4l2_enc_deinit(enc_context_p ctx);
+int v4l2_enc_reqbufs(enc_context_p ctx);
+int v4l2_enc_querybuf(enc_context_p ctx);
+int v4l2_enc_s_fmt(enc_context_p ctx);
+int v4l2_enc_streamon(enc_context_p ctx);
+int v4l2_enc_streamoff(enc_context_p ctx);
+int v4l2_enc_s_ext_ctrls(enc_context_p ctx, struct v4l2_ext_controls* ext_ctrls);
+int v4l2_enc_s_parm(enc_context_p ctx, struct v4l2_streamparm *parm);
+int v4l2_enc_qbuf_input(enc_context_p ctx, void *data, int size);
+int v4l2_enc_qbuf_output(enc_context_p ctx);
+int v4l2_enc_dqbuf_input(enc_context_p ctx);
+int v4l2_enc_dqbuf_output(enc_context_p ctx);
 
 #endif /* V4l2_UTILS_H */

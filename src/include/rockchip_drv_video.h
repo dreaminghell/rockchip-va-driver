@@ -33,12 +33,12 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <va/va.h>
 #include <va/va_backend.h>
 #include <va/va_enc_h264.h>
 
 #include "config.h"
 #include "object_heap.h"
-#include "rockchip_buffer.h"
 #include "rockchip_image.h"
 #include "rockchip_surface.h"
 #include "rockchip_picture.h"

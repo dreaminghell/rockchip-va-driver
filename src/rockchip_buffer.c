@@ -22,7 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "rockchip_drv_video.h"
+#include "rockchip_buffer.h"
 
 VAStatus rockchip_allocate_buffer(object_buffer_p obj_buffer, int size)
 {
@@ -30,7 +30,9 @@ VAStatus rockchip_allocate_buffer(object_buffer_p obj_buffer, int size)
 
     obj_buffer->buffer_base = malloc(size + 64);
     obj_buffer->buffer_data = obj_buffer->buffer_base + 64;
-    obj_buffer->buffer_data -= ((unsigned int)obj_buffer->buffer_data) % 64;
+    /* alignmetion */
+    obj_buffer->buffer_data -= ((long)obj_buffer->buffer_data) % 64;
+
     if (NULL == obj_buffer->buffer_data) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
     }

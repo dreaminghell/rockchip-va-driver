@@ -36,7 +36,7 @@
             PRINT("ioctl() failed: " #type); \
     } while (0)
 
-enc_context_p v4l2_init(const char *device_path) {
+enc_context_p v4l2_enc_init(const char *device_path) {
     int fd = open(device_path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 
     if (fd <= 0) {
@@ -64,7 +64,7 @@ failed_rk_v4l2:
     return NULL;
 }
 
-enc_context_p v4l2_init_by_name(const char *name) {
+enc_context_p v4l2_enc_init_by_name(const char *name) {
     DIR *dir;
     struct dirent *ent;
 
@@ -95,7 +95,7 @@ enc_context_p v4l2_init_by_name(const char *name) {
             snprintf(path, sizeof(path), DEV_PATH "%s",
                     ent->d_name);
 
-            ctx = v4l2_init(path);
+            ctx = v4l2_enc_init(path);
             if (ctx)
                 break;
         }
@@ -104,7 +104,7 @@ enc_context_p v4l2_init_by_name(const char *name) {
     return ctx;
 }
 
-int v4l2_deinit(enc_context_p ctx) {
+int v4l2_enc_deinit(enc_context_p ctx) {
     struct v4l2_requestbuffers reqbufs;
     memset(&reqbufs, 0, sizeof(reqbufs));
     reqbufs.count = 0;
@@ -125,7 +125,7 @@ int v4l2_deinit(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_reqbufs(enc_context_p ctx) {
+int v4l2_enc_reqbufs(enc_context_p ctx) {
     struct v4l2_requestbuffers reqbufs;
     memset(&reqbufs, 0, sizeof(reqbufs));
     reqbufs.count = 1;
@@ -142,7 +142,7 @@ int v4l2_reqbufs(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_querybuf(enc_context_p ctx) {
+int v4l2_enc_querybuf(enc_context_p ctx) {
     struct v4l2_plane planes[VIDEO_MAX_PLANES];
     struct v4l2_buffer buffer;
     memset(&buffer, 0, sizeof(buffer));
@@ -188,7 +188,7 @@ int v4l2_querybuf(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_s_fmt(enc_context_p ctx) {
+int v4l2_enc_s_fmt(enc_context_p ctx) {
     struct v4l2_format format;
     memset(&format, 0, sizeof(format));
     format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
@@ -210,7 +210,7 @@ int v4l2_s_fmt(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_streamon(enc_context_p ctx) {
+int v4l2_enc_streamon(enc_context_p ctx) {
     __u32 type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     IOCTL_OR_ERROR_RETURN(VIDIOC_STREAMON, &type);
 
@@ -220,7 +220,7 @@ int v4l2_streamon(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_streamoff(enc_context_p ctx) {
+int v4l2_enc_streamoff(enc_context_p ctx) {
     __u32 type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     IOCTL_OR_ERROR_RETURN(VIDIOC_STREAMOFF, &type);
 
@@ -230,19 +230,19 @@ int v4l2_streamoff(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_s_ext_ctrls(enc_context_p ctx, struct v4l2_ext_controls* ext_ctrls) {
+int v4l2_enc_s_ext_ctrls(enc_context_p ctx, struct v4l2_ext_controls* ext_ctrls) {
     IOCTL_OR_ERROR_RETURN(VIDIOC_S_EXT_CTRLS, ext_ctrls);
 
     return 0;
 }
 
-int v4l2_s_parm(enc_context_p ctx, struct v4l2_streamparm *parm) {
+int v4l2_enc_s_parm(enc_context_p ctx, struct v4l2_streamparm *parm) {
     IOCTL_OR_ERROR_RETURN(VIDIOC_S_PARM, parm);
 
     return 0;
 }
 
-int v4l2_qbuf_input(enc_context_p ctx, void *data, int size) {
+int v4l2_enc_qbuf_input(enc_context_p ctx, void *data, int size) {
     struct v4l2_buffer qbuf;
     struct v4l2_plane qbuf_planes[VIDEO_MAX_PLANES];
     memset(&qbuf, 0, sizeof(qbuf));
@@ -269,7 +269,7 @@ int v4l2_qbuf_input(enc_context_p ctx, void *data, int size) {
     return 0;
 }
 
-int v4l2_qbuf_output(enc_context_p ctx) {
+int v4l2_enc_qbuf_output(enc_context_p ctx) {
     struct v4l2_buffer qbuf;
     struct v4l2_plane qbuf_planes[VIDEO_MAX_PLANES];
     memset(&qbuf, 0, sizeof(qbuf));
@@ -284,7 +284,7 @@ int v4l2_qbuf_output(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_dqbuf_input(enc_context_p ctx) {
+int v4l2_enc_dqbuf_input(enc_context_p ctx) {
     struct v4l2_buffer dqbuf;
     struct v4l2_plane planes[VIDEO_MAX_PLANES];
     memset(&dqbuf, 0, sizeof(dqbuf));
@@ -305,7 +305,7 @@ int v4l2_dqbuf_input(enc_context_p ctx) {
     return 0;
 }
 
-int v4l2_dqbuf_output(enc_context_p ctx) {
+int v4l2_enc_dqbuf_output(enc_context_p ctx) {
     struct v4l2_buffer dqbuf;
     struct v4l2_plane planes[VIDEO_MAX_PLANES];
 
