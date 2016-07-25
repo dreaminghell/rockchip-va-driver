@@ -31,7 +31,7 @@ VAStatus rockchip_allocate_buffer(object_buffer_p obj_buffer, int size)
     obj_buffer->buffer_base = malloc(size + 64);
     obj_buffer->buffer_data = obj_buffer->buffer_base + 64;
     /* alignmetion */
-    obj_buffer->buffer_data -= ((long)obj_buffer->buffer_data) % 64;
+    obj_buffer->buffer_data -= ((uintptr_t)obj_buffer->buffer_data) % 64;
 
     if (NULL == obj_buffer->buffer_data) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
