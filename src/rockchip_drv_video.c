@@ -44,6 +44,7 @@ static VAStatus rockchip_QueryConfigProfiles(
     profile_list[i++] = VAProfileH264Main;
     profile_list[i++] = VAProfileH264Baseline;
     profile_list[i++] = VAProfileH264ConstrainedBaseline;
+    profile_list[i++] = VAProfileVP8Version0_3;
 
     /* If the assert fails then ROCKCHIP_MAX_PROFILES needs to be bigger */
     ASSERT(i <= ROCKCHIP_MAX_PROFILES);
@@ -70,6 +71,7 @@ static VAStatus rockchip_QueryConfigEntrypoints(
     case VAProfileH264Main:
     case VAProfileH264Baseline:
     case VAProfileH264ConstrainedBaseline:
+    case VAProfileVP8Version0_3:
         *num_entrypoints = 1;
         entrypoint_list[0] = VAEntrypointEncSlice;
         break;
@@ -161,6 +163,7 @@ static VAStatus rockchip_CreateConfig(
     case VAProfileH264Main:
     case VAProfileH264Baseline:
     case VAProfileH264ConstrainedBaseline:
+    case VAProfileVP8Version0_3:
         if (VAEntrypointEncSlice == entrypoint) {
             vaStatus = VA_STATUS_SUCCESS;
         } else {
