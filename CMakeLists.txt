@@ -21,7 +21,7 @@ ADD_LIBRARY(rockchip_drv_video SHARED
 src/rockchip_drv_video.c src/object_heap.c
 src/rockchip_buffer.c src/rockchip_encoder.c
 src/rockchip_image.c src/rockchip_picture.c
-src/rockchip_surface.c src/v4l2_utils.c
+src/rockchip_surface.c src/v4l2_enc_utils.c
 )
 
 TARGET_LINK_LIBRARIES(rockchip_drv_video ${LIBVA_LIBRARIES} rkvpu pthread)

@@ -1,0 +1,15 @@
+libva-rockchip (0.20-2) unstable; urgency=low
+  * add support for VP8 encoder
+
+ -- Randy Li <randy.li@rock-chips.com>  Mon, 25 Jul 2016 17:14:24 +0800
+
+libva-rockchip (0.20-1) unstable; urgency=low
+  * merge  external libraries version
+
+ -- Randy Li <randy.li@rock-chips.com>  Sat, 16 Jul 2016 10:24:24 +0800
+
+libva-rockchip (0.10-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Randy Li <randy.li@rock-chips.com>  Wed, 13 Jul 2016 05:54:24 +0000
