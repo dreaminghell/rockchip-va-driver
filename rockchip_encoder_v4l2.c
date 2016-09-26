@@ -265,6 +265,10 @@ rk_enc_push_buffer
 	struct object_buffer *obj_buffer;
 	struct rk_v4l2_buffer *inbuf, *outbuf;
 	VACodedBufferSegment *coded_buffer_segment = NULL;
+	VAEncPackedHeaderParameterBuffer *param = NULL;
+	uint8_t *header_data = (uint8_t *)
+		(*encode_state->packed_header_data_ext)->buffer;
+	uint32_t length_in_bits;
 
 	/* input YUV surface */
 	obj_surface = encode_state->input_yuv_object;
@@ -283,14 +287,34 @@ rk_enc_push_buffer
 	if (0 == encode_context->v4l2_ctx->ops.dqbuf_output
 			(encode_context->v4l2_ctx, &outbuf))
 	{
+		uint32_t header_length = 0;
+		uint32_t encoded_length = 0;
 		ASSERT(VAEncCodedBufferType == obj_buffer->type);
-		/* FIXME how to output here ? */
+
+		param = (VAEncPackedHeaderParameterBuffer *)
+			(*encode_state->packed_header_params_ext)->buffer;
+		length_in_bits = param->bit_length;
+
 		coded_buffer_segment = (VACodedBufferSegment *)
 			obj_buffer->buffer_store->buffer;
-		coded_buffer_segment->size
-			= rk_v4l2_buffer_total_bytesused(outbuf);
-		/* FIXME Insert header */
-		coded_buffer_segment->buf = outbuf->plane[0].data;
+
+		header_length = length_in_bits / 8;
+		encoded_length = rk_v4l2_buffer_total_bytesused(outbuf);
+		coded_buffer_segment->size = encoded_length + header_length;
+
+		coded_buffer_segment->buf = malloc(coded_buffer_segment->size);
+
+		if (NULL == coded_buffer_segment->buf) {
+			rk_info_msg("coded buffer failed %d\n",
+					coded_buffer_segment->size);
+			return;
+		}
+
+		memcpy(coded_buffer_segment->buf, header_data, header_length);
+		memcpy(coded_buffer_segment->buf + header_length,
+				outbuf->plane[0].data,
+				encoded_length);
+
 		coded_buffer_segment->next = NULL;
 		coded_buffer_segment->bit_offset = 0;
 		coded_buffer_segment->status = 0;
